@@ -1,19 +1,29 @@
 name: Harbour for Windows 64 using MinGW
 
+#See docs at https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
+
 on:
+  #We are using 2 triggers, the "push" (meaning when we commit/push to this repo) and "Star" (turning "on" here)
   push:
     branches:
       - master
+  #The following run a workflow when someone stars a repository, but later only the repo owner can do the build
   watch:
    types: [started]
 
+#In this workflow we only have a single job called (id) "build"
 jobs:
+  #The following "build" is the name of a job
+  #Each job runs in an environment specified by runs-on
   build:
     runs-on: windows-latest
     
+    #The following prevents to execute the action by others and only by maintainers for example.
     if: github.actor == github.event.repository.owner.login
     
+    #The job named "build" has several steps
     steps:    
+    
     - name: Checkout harbour/core repo
       uses: actions/checkout@v2
       with:
