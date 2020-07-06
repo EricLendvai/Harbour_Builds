@@ -1,7 +1,9 @@
 name: List All Runs On Files
 
 on:
-  push:
+  #push:
+  watch:
+   types: [started]
 
 jobs:
   build:
@@ -15,8 +17,8 @@ jobs:
       shell: cmd
       run: |
         mkdir output
-        # dir c:\*.* /s >output\allfiles
-        dir c:\*.* >output\allfiles
+        dir c:\*.* /s >output\allfiles.txt
+        #dir c:\*.* >output\allfiles
 
     - name: Get current date
       uses: srfrnk/current-time@master
