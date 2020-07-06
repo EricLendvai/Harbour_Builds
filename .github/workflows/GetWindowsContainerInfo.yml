@@ -1,0 +1,33 @@
+name: List All Runs On Files
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    if: github.actor == github.event.repository.owner.login
+    
+    steps:
+
+    - name: Fetch Info
+      shell: cmd
+      run: |
+        mkdir output
+        # dir c:\*.* /s >output\allfiles
+        dir c:\*.* >output\allfiles
+
+    - name: Get current date
+      uses: srfrnk/current-time@master
+      id: current-time
+      with:
+        format: YYYY_MM_DD
+ 
+    - name: Upload info to artifact
+      env:
+         TIME: "${{ steps.current-time.outputs.formattedTime }}"
+      uses: actions/upload-artifact@v2
+      with:
+        name: allfiles_${{ env.TIME }}
+        path: output          
