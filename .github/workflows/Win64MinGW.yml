@@ -16,6 +16,7 @@ jobs:
   #The following "build" is the name of a job
   #Each job runs in an environment specified by runs-on
   build:
+    #To see what is installed on the runs-on go to https://github.com/actions/virtual-environments
     runs-on: windows-latest
     
     #The following prevents to execute the action by others and only by maintainers for example.
