@@ -65,13 +65,13 @@ jobs:
         copy harbour\lib\win\mingw64\*.a output\lib
         mkdir output\include 
         copy harbour\include output\include
-        mkdir output\OpenSSL-Win64
-        mkdir output\OpenSSL-Win64\lib
-        mkdir output\OpenSSL-Win64\bin
-        mkdir output\OpenSSL-Win64\include
-        xcopy c:\OpenSSL-Win64\lib\     output\OpenSSL-Win64\lib\     /E /Y
-        xcopy c:\OpenSSL-Win64\bin\     output\OpenSSL-Win64\bin\     /E /Y
-        xcopy c:\OpenSSL-Win64\include\ output\OpenSSL-Win64\include\ /E /Y
+#        mkdir output\OpenSSL-Win64
+#        mkdir output\OpenSSL-Win64\lib
+#        mkdir output\OpenSSL-Win64\bin
+#        mkdir output\OpenSSL-Win64\include
+#        xcopy c:\OpenSSL-Win64\lib\     output\OpenSSL-Win64\lib\     /E /Y
+#        xcopy c:\OpenSSL-Win64\bin\     output\OpenSSL-Win64\bin\     /E /Y
+#        xcopy c:\OpenSSL-Win64\include\ output\OpenSSL-Win64\include\ /E /Y
         
     - name: Get current time
       uses: srfrnk/current-time@master
