@@ -23,8 +23,8 @@ jobs:
     if: github.actor == github.event.repository.owner.login
     
     #The job named "build" has several steps
-    steps:    
-    
+    steps:
+
     - name: Checkout harbour/core repo
       uses: actions/checkout@v2
       with:
@@ -32,12 +32,12 @@ jobs:
        path: harbour
 
     - name: Install dependencies
-      run: |
+      run:
          choco install openssl
          copy-Item 'c:\Program Files\OpenSSL-Win64' -destination 'c:\OpenSSL-Win64' -recurse
          choco install curl
          (Get-Content -path harbour\contrib\hbssl\hbssl.hbp) -replace '/../inc32','' | Set-Content -path harbour\contrib\hbssl\hbssl.hbp
-         
+
     - name: Compile Harbour
       shell: cmd
       run: |
@@ -47,14 +47,11 @@ jobs:
         set HB_BUILD_CONTRIBS=yes
         set HB_WITH_OPENSSL=c:/OpenSSL-Win64/include/
         set HB_WITH_CURL=c:/ProgramData/chocolatey/lib/curl/tools/curl-7.82.0-win64-mingw/include/  
-#        set HB_OPENSSL_STATIC=yes
-#        set HB_STATIC_OPENSSL=yes
-#        set HB_STATIC_CURL=yes
         set HB_COMPILER=mingw64
         SET HB_BUILD_CONTRIB_DYN=
         SET HB_BUILD_DYN=
         win-make.exe
-        
+
     - name: Create output folders
       shell: cmd
       run: |
@@ -65,14 +62,7 @@ jobs:
         copy harbour\lib\win\mingw64\*.a output\lib
         mkdir output\include 
         copy harbour\include output\include
-#        mkdir output\OpenSSL-Win64
-#        mkdir output\OpenSSL-Win64\lib
-#        mkdir output\OpenSSL-Win64\bin
-#        mkdir output\OpenSSL-Win64\include
-#        xcopy c:\OpenSSL-Win64\lib\     output\OpenSSL-Win64\lib\     /E /Y
-#        xcopy c:\OpenSSL-Win64\bin\     output\OpenSSL-Win64\bin\     /E /Y
-#        xcopy c:\OpenSSL-Win64\include\ output\OpenSSL-Win64\include\ /E /Y
-        
+
     - name: Get current time
       uses: srfrnk/current-time@master
       id: current-time
