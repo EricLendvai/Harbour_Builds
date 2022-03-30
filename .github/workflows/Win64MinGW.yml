@@ -1,6 +1,7 @@
-name: Harbour for Windows 64 using MinGW
+name: Harbour for Windows 64 using MinGW and with CURL SSL Support
 
 #See docs at https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
+#This will build with mingw 8.1 as of 2022/03/29
 
 on:
   #We are using 2 triggers, the "push" (meaning when we commit/push to this repo) and "Star" (turning "on" here)
@@ -28,16 +29,23 @@ jobs:
     - name: Checkout harbour/core repo
       uses: actions/checkout@v2
       with:
-       repository: harbour/core
-       path: harbour
+        repository: harbour/core
+        path: harbour
 
     - name: Install dependencies
-      run:
-         choco install openssl
-         copy-Item 'c:\Program Files\OpenSSL-Win64' -destination 'c:\OpenSSL-Win64' -recurse
-         choco install curl
-         (Get-Content -path harbour\contrib\hbssl\hbssl.hbp) -replace '/../inc32','' | Set-Content -path harbour\contrib\hbssl\hbssl.hbp
+      run: |
+        choco install openssl
+        copy-Item 'c:\Program Files\OpenSSL-Win64' -destination 'c:\OpenSSL-Win64' -recurse
+        choco install curl
 
+    - name: Fixing Harbour hbssl.hbp and hbssl.hbc
+      run: |
+        (Get-Content -path harbour\contrib\hbssl\hbssl.hbp) -replace '/../inc32','' | Set-Content -path harbour\contrib\hbssl\hbssl.hbp
+        (Get-Content -path harbour\contrib\hbssl\hbssl.hbp) -replace 'libeay32','libcrypto-1_1-x64' | Set-Content -path harbour\contrib\hbssl\hbssl.hbp
+        (Get-Content -path harbour\contrib\hbssl\hbssl.hbp) -replace 'ssleay32','libssl-1_1-x64' | Set-Content -path harbour\contrib\hbssl\hbssl.hbp
+        (Get-Content -path harbour\contrib\hbssl\hbssl.hbc) -replace 'libeay32','libcrypto' | Set-Content -path harbour\contrib\hbssl\hbssl.hbc
+        (Get-Content -path harbour\contrib\hbssl\hbssl.hbc) -replace 'ssleay32','libssl' | Set-Content -path harbour\contrib\hbssl\hbssl.hbc
+ 
     - name: Compile Harbour
       shell: cmd
       run: |
@@ -50,6 +58,8 @@ jobs:
         set HB_COMPILER=mingw64
         SET HB_BUILD_CONTRIB_DYN=
         SET HB_BUILD_DYN=
+        SET HB_STATIC_OPENSSL=yes
+        SET HB_STATIC_CURL=yes
         win-make.exe
 
     - name: Create output folders

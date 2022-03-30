@@ -28,13 +28,13 @@ jobs:
     - name: Checkout harbour/core repo
       uses: actions/checkout@v2
       with:
-       repository: harbour/core
-       path: harbour
+        repository: harbour/core
+        path: harbour
 
     - name: Install dependencies
       run: |
-         sudo apt install libcurl4-openssl-dev libssl-dev gcc
-         sudo cp -r /usr/include/x86_64-linux-gnu/curl /usr/include
+        sudo apt install libcurl4-openssl-dev libssl-dev gcc
+        sudo cp -r /usr/include/x86_64-linux-gnu/curl /usr/include
          
     - name: Compile harbour
       run: |
@@ -62,8 +62,8 @@ jobs:
  
     - name: Upload Harbour to artifact
       env:
-         TIME: "${{ steps.current-time.outputs.formattedTime }}"
+        TIME: "${{ steps.current-time.outputs.formattedTime }}"
       uses: actions/upload-artifact@v2
       with:
-       name: harbour_ubuntu_64_${{ env.TIME }}
-       path: output     
+        name: harbour_ubuntu_64_${{ env.TIME }}
+        path: output     
