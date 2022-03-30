@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2019
     
     #The following prevents to execute the action by others and only by maintainers for example.
     if: github.actor == github.event.repository.owner.login
