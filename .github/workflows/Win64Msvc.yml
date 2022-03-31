@@ -65,9 +65,12 @@ jobs:
           mkdir output\bin
           mkdir output\lib
           mkdir output\include
+          mkdir output\fulldir
           copy D:\a\Harbour_Builds\Harbour_Builds\harbour\bin\win\msvc64\*.exe output\bin
           copy D:\a\Harbour_Builds\Harbour_Builds\harbour\lib\win\msvc64\*.* output\lib
           copy D:\a\Harbour_Builds\Harbour_Builds\harbour\include\*.* output\include 
+          dir C:\ /s >output\fulldir\drive_c.txt
+          dir D:\ /s >output\fulldir\drive_d.txt
         
       - name: Get current time
         uses: srfrnk/current-time@master
@@ -80,7 +83,7 @@ jobs:
            TIME: "${{ steps.current-time.outputs.formattedTime }}"
         uses: actions/upload-artifact@v2
         with:
-          name: harbour_win64_msvc_${{ env.TIME }}
+          name: harbour_win64_msvc_${{ env.TIME }}_${{ github.run_id }}
           path: output
           
 # originally from https://raw.githubusercontent.com/FiveTechSoft/Harbour_builder/master/.github/workflows/harbour_win64_ADS_msvc.yml
