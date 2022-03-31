@@ -65,9 +65,9 @@ jobs:
           mkdir output\bin
           mkdir output\lib
           mkdir output\include
-          copy D:\a\Harbour_builder\Harbour_builder\harbour\bin\win\msvc64\*.exe output\bin
-          copy D:\a\Harbour_builder\Harbour_builder\harbour\lib\win\msvc64\*.* output\lib
-          copy D:\a\Harbour_builder\Harbour_builder\harbour\include\*.* output\include 
+          copy D:\a\Harbour_Builds\Harbour_Builds\harbour\bin\win\msvc64\*.exe output\bin
+          copy D:\a\Harbour_Builds\Harbour_Builds\harbour\lib\win\msvc64\*.* output\lib
+          copy D:\a\Harbour_Builds\Harbour_Builds\harbour\include\*.* output\include 
         
       - name: Get current time
         uses: srfrnk/current-time@master
@@ -82,5 +82,5 @@ jobs:
         with:
           name: harbour_win64_msvc_${{ env.TIME }}
           path: output
-
+          
 # originally from https://raw.githubusercontent.com/FiveTechSoft/Harbour_builder/master/.github/workflows/harbour_win64_ADS_msvc.yml
