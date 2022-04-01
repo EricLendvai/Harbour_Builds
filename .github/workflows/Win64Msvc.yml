@@ -34,6 +34,7 @@ jobs:
           mkdir output
           mkdir output\fulldir
           set >output\fulldir\EnvVariable.txt
+          dir C:\vcpkg\*.* /s >output\fulldir\vcpkg.txt
                   
       - name: Get current time
         uses: srfrnk/current-time@master
@@ -46,5 +47,5 @@ jobs:
            TIME: "${{ steps.current-time.outputs.formattedTime }}"
         uses: actions/upload-artifact@v2
         with:
-          name: harbour_win64_msvc_${{ env.TIME }}_${{ github.run_id }}
+          name: harbour_win64_msvc_${{ env.TIME }}_${GITHUB_RUN_NUMBER}
           path: output
