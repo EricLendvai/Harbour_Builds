@@ -68,8 +68,9 @@ jobs:
           mkdir output\fulldir
           copy D:\a\Harbour_Builds\Harbour_Builds\harbour\bin\win\msvc64\*.exe output\bin
           copy D:\a\Harbour_Builds\Harbour_Builds\harbour\lib\win\msvc64\*.* output\lib
-          copy D:\a\Harbour_Builds\Harbour_Builds\harbour\include\*.* output\include 
-          dir D:\a\Harbour_Builds\Harbour_Builds\*.dll /s >output\fulldir\drive_dll_d.txt
+          copy D:\a\Harbour_Builds\Harbour_Builds\harbour\include\*.* output\include
+          echo set >output\fulldir\EnvVariable.txt
+          dir ${VCPKG_ROOT}\*.* /s >output\fulldir\drive_dll_d.txt
         
       - name: Get current time
         uses: srfrnk/current-time@master
