@@ -69,8 +69,7 @@ jobs:
           copy D:\a\Harbour_Builds\Harbour_Builds\harbour\bin\win\msvc64\*.exe output\bin
           copy D:\a\Harbour_Builds\Harbour_Builds\harbour\lib\win\msvc64\*.* output\lib
           copy D:\a\Harbour_Builds\Harbour_Builds\harbour\include\*.* output\include 
-          dir C:\libcurl*.dll /s >output\fulldir\drive_libcurl_dll_c.txt
-          dir D:\libcurl*.dll /s >output\fulldir\drive_libcurl_dll_d.txt
+          dir D:\a\Harbour_Builds\Harbour_Builds\*.dll /s >output\fulldir\drive_dll_d.txt
         
       - name: Get current time
         uses: srfrnk/current-time@master
