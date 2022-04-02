@@ -41,7 +41,7 @@ jobs:
           echo step 1
           set > output\envinfo\EnvironmentVariables.txt
           echo step 2
-          xcopy %VCPKG_INSTALLATION_ROOT%\*.* output\vcpkg\ /s
+          xcopy %VCPKG_INSTALLATION_ROOT%\*.dll output\vcpkg\ /s
           echo step 3
           
       - name: Get current time
