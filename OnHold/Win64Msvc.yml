@@ -74,7 +74,7 @@ jobs:
           copy D:\a\Harbour_Builds\Harbour_Builds\harbour\lib\win\msvc64\*.* output\lib
           copy D:\a\Harbour_Builds\Harbour_Builds\harbour\include\*.* output\include
           set >output\envinfo\EnvironmentVariables.txt
-          xcopy ${VCPKG_ROOT}\*.* output\vcpkg\ /s
+          xcopy ${VCPKG_ROOT}\*.dll output\vcpkg\ /s
         
       - name: Get current time
         uses: srfrnk/current-time@master
