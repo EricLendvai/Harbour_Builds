@@ -1,5 +1,8 @@
 name: Harbour for Win64 using msvc Curl ssl
 
+#Example of code used to discover where files are stored
+#dir C:\vcpkg\*.* /s >output\fulldir\vcpkg.txt
+
 on:
   #We are using 2 triggers, the "push" (meaning when we commit/push to this repo) and "Star" (turning "on" here)
   push:
@@ -65,12 +68,13 @@ jobs:
           mkdir output\bin
           mkdir output\lib
           mkdir output\include
-          mkdir output\fulldir
+          mkdir output\envinfo
+          mkdir output\vcpkg
           copy D:\a\Harbour_Builds\Harbour_Builds\harbour\bin\win\msvc64\*.exe output\bin
           copy D:\a\Harbour_Builds\Harbour_Builds\harbour\lib\win\msvc64\*.* output\lib
           copy D:\a\Harbour_Builds\Harbour_Builds\harbour\include\*.* output\include
-          echo set >output\fulldir\EnvVariable.txt
-          dir ${VCPKG_ROOT}\*.* /s >output\fulldir\drive_dll_d.txt
+          set >output\envinfo\EnvironmentVariables.txt
+          xcopy ${VCPKG_ROOT}\*.* output\vcpkg\ /s
         
       - name: Get current time
         uses: srfrnk/current-time@master
@@ -83,7 +87,7 @@ jobs:
            TIME: "${{ steps.current-time.outputs.formattedTime }}"
         uses: actions/upload-artifact@v2
         with:
-          name: harbour_win64_msvc_${{ env.TIME }}_${{ github.run_id }}
+          name: harbour_win64_msvc_${{env.TIME}}_${{github.run_number}}
           path: output
           
 # originally from https://raw.githubusercontent.com/FiveTechSoft/Harbour_builder/master/.github/workflows/harbour_win64_ADS_msvc.yml
