@@ -33,12 +33,16 @@ jobs:
       - name: Create output folders
         shell: cmd
         run: |
+          echo on
           pwd
           mkdir output
           mkdir output\envinfo
           mkdir output\vcpkg
-          set >output\envinfo\EnvironmentVariables.txt
+          echo step 1
+          set > output\envinfo\EnvironmentVariables.txt
+          echo step 2
           xcopy ${VCPKG_ROOT}\*.* output\vcpkg\ /s
+          echo step 3
           
       - name: Get current time
         uses: srfrnk/current-time@master
