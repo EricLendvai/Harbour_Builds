@@ -1,0 +1,59 @@
+name: Harbour for Win64 using msvc Curl ssl
+
+#Example of code used to discover where files are stored
+#dir C:\vcpkg\*.* /s >output\fulldir\vcpkg.txt
+
+on:
+  #We are using 2 triggers, the "push" (meaning when we commit/push to this repo) and "Star" (turning "on" here)
+  push:
+    branches:
+      - main
+  #The following run a workflow when someone stars a repository, but later only the repo owner can do the build
+  watch:
+    types: [started]
+
+jobs:
+  build:
+    runs-on: windows-2019
+    
+    #The following prevents to execute the action by others and only by maintainers for example.
+    if: github.actor == github.event.repository.owner.login
+
+    steps:
+      - uses: actions/checkout@v2
+    
+      - name: Installing dependencies
+        shell: cmd 
+        run: |
+          vcpkg.exe install curl:x64-windows
+          vcpkg.exe install openssl:x64-windows
+          vcpkg integrate install
+          
+          
+      - name: Create output folders
+        shell: cmd
+        run: |
+          echo on
+          pwd
+          mkdir output
+          mkdir output\envinfo
+          mkdir output\vcpkg
+          echo step 1
+          set > output\envinfo\EnvironmentVariables.txt
+          echo step 2
+          xcopy %VCPKG_INSTALLATION_ROOT%\*.dll output\vcpkg\ /s
+          echo step 3
+          
+      - name: Get current time
+        uses: srfrnk/current-time@master
+        id: current-time
+        with:
+          format: YYYY_MM_DD
+ 
+      - name: Upload Harbour to artifact
+        env:
+           TIME: "${{ steps.current-time.outputs.formattedTime }}"
+        uses: actions/upload-artifact@v2
+        with:
+          name: harbour_win64_msvc_${{env.TIME}}_${{github.run_number}}
+          path: output

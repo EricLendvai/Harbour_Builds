@@ -1,0 +1,71 @@
+name: Harbour for Ubuntu 64-bits
+
+#See docs at https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
+
+on:
+  #We are using 2 triggers, the "push" (meaning when we commit/push to this repo) and "Star" (turning "on" here)
+  push:
+    branches:
+      - main
+  #The following run a workflow when someone stars a repository, but later only the repo owner can do the build
+  watch:
+    types: [started]
+
+#In this workflow we only have a single job called (id) "build"
+jobs:
+  #The following "build" is the name of a job
+  #Each job runs in an environment specified by runs-on
+  build:
+    #To see what is installed on the runs-on go to https://github.com/actions/virtual-environments
+    runs-on: ubuntu-20.04
+    
+    #The following prevents to execute the action by others and only by maintainers for example.
+    if: github.actor == github.event.repository.owner.login
+    
+    #The job named "build" has several steps
+    steps:
+    
+    - name: Checkout harbour/core repo
+      uses: actions/checkout@v2
+      with:
+        repository: harbour/core
+        path: harbour
+
+    - name: Install dependencies
+      run: |
+        sudo apt install libcurl4-openssl-dev libssl-dev gcc
+        sudo cp -r /usr/include/x86_64-linux-gnu/curl /usr/include
+         
+    - name: Compile harbour
+      run: |
+        cd harbour
+        export HB_USER_CFLAGS="-fPIC"
+        export HB_BUILD_CONTRIBS
+        export HB_WITH_PCRE=local
+        make
+        
+    - name: Create output folders
+      run: |
+        mkdir output
+        mkdir output/bin
+        mkdir output/lib
+        mkdir output/include 
+        mkdir output/build_environment_info
+        cp harbour/bin/linux/gcc/* output/bin
+        cp harbour/lib/linux/gcc/*.a output/lib
+        cp harbour/include/* output/include
+        printenv >output/build_environment_info/list.txt
+        
+    - name: Get current time
+      uses: srfrnk/current-time@master
+      id: current-time
+      with:
+        format: YYYY_MM_DD
+ 
+    - name: Upload Harbour to artifact
+      env:
+        TIME: "${{steps.current-time.outputs.formattedTime}}"
+      uses: actions/upload-artifact@v2
+      with:
+        name: harbour_ubuntu_64_${{env.TIME}}_${{github.run_number}}
+        path: output     

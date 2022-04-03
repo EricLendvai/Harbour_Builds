@@ -1,0 +1,100 @@
+name: Harbour for Windows 64 using MinGW and with CURL SSL Support
+
+#See docs at https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
+#This will build with mingw 8.1 as of 2022/03/29
+
+on:
+  #We are using 2 triggers, the "push" (meaning when we commit/push to this repo) and "Star" (turning "on" here)
+  push:
+    branches:
+      - main
+  #The following run a workflow when someone stars a repository, but later only the repo owner can do the build
+  watch:
+    types: [started]
+
+#In this workflow we only have a single job called (id) "build"
+jobs:
+  #The following "build" is the name of a job
+  #Each job runs in an environment specified by runs-on
+  build:
+    #To see what is installed on the runs-on go to https://github.com/actions/virtual-environments
+    runs-on: windows-2019
+    
+    #The following prevents to execute the action by others and only by maintainers for example.
+    if: github.actor == github.event.repository.owner.login
+    
+    #The job named "build" has several steps
+    steps:
+
+    - name: Checkout harbour/core repo
+      uses: actions/checkout@v2
+      with:
+        repository: harbour/core
+        path: harbour
+
+    - name: Install dependencies
+      run: |
+        choco install openssl
+        copy-Item 'c:\Program Files\OpenSSL-Win64' -destination 'c:\OpenSSL-Win64' -recurse
+        choco install curl
+
+    - name: Fixing Harbour hbssl.hbp and hbssl.hbc
+      run: |
+        (Get-Content -path harbour\contrib\hbssl\hbssl.hbp) -replace '/../inc32','' | Set-Content -path harbour\contrib\hbssl\hbssl.hbp
+        (Get-Content -path harbour\contrib\hbssl\hbssl.hbp) -replace 'libeay32','libcrypto-1_1-x64' | Set-Content -path harbour\contrib\hbssl\hbssl.hbp
+        (Get-Content -path harbour\contrib\hbssl\hbssl.hbp) -replace 'ssleay32','libssl-1_1-x64' | Set-Content -path harbour\contrib\hbssl\hbssl.hbp
+        (Get-Content -path harbour\contrib\hbssl\hbssl.hbc) -replace 'libeay32','libcrypto' | Set-Content -path harbour\contrib\hbssl\hbssl.hbc
+        (Get-Content -path harbour\contrib\hbssl\hbssl.hbc) -replace 'ssleay32','libssl' | Set-Content -path harbour\contrib\hbssl\hbssl.hbc
+ 
+    - name: Compile Harbour
+      shell: cmd
+      run: |
+        cd harbour
+        set HB_BUILD_MODE=c
+        set HB_USER_PRGFLAGS=-l-
+        set HB_BUILD_CONTRIBS=yes
+        set HB_WITH_OPENSSL=c:/OpenSSL-Win64/include/
+        set HB_WITH_CURL=c:/ProgramData/chocolatey/lib/curl/tools/curl-7.82.0-win64-mingw/include/  
+        set HB_COMPILER=mingw64
+        SET HB_BUILD_CONTRIB_DYN=yes
+        SET HB_BUILD_DYN=yes
+        SET HB_STATIC_OPENSSL=yes
+        SET HB_STATIC_CURL=yes
+        win-make.exe
+
+    - name: Create output folders
+      shell: cmd
+      run: |
+        pwd
+        mkdir output
+        mkdir output\bin
+        mkdir output\lib
+        mkdir output\include 
+        mkdir output\build_environment_info
+        mkdir output\curl_support_dlls
+        copy harbour\bin\win\mingw64\*.exe output\bin
+        copy harbour\lib\win\mingw64\*.a output\lib
+        copy harbour\include output\include
+        set >output\build_environment_info\EnvironmentVariables.txt
+        copy C:\ProgramData\chocolatey\lib\curl\tools\curl-7.82.0-win64-mingw\bin\libcurl-x64.dll output\curl_support_dlls\libcurl.dll
+        copy C:\OpenSSL-Win64\bin\libcrypto-1_1-x64.dll                                           output\curl_support_dlls\libcrypto-1_1-x64.dll
+        copy C:\OpenSSL-Win64\bin\libssl-1_1-x64.dll                                              output\curl_support_dlls\libssl-1_1-x64.dll
+        
+    - name: Get current time
+      uses: srfrnk/current-time@master
+      id: current-time
+      with:
+        format: YYYY_MM_DD
+ 
+    - name: Upload Harbour to artifact
+      env:
+         TIME: "${{steps.current-time.outputs.formattedTime}}"
+      uses: actions/upload-artifact@v2
+      with:
+       name: harbour_win64_mingw64_${{env.TIME}}_${{github.run_number}}
+       path: output
+       
+       
+#Originally from https://github.com/FiveTechSoft/Harbour_builder/actions/runs/145132362/workflow
+
+ 

@@ -2,6 +2,7 @@ name: Harbour for Win64 using msvc Curl ssl
 
 #Example of code used to discover where files are stored
 #dir C:\vcpkg\*.* /s >output\fulldir\vcpkg.txt
+#xcopy ${VCPKG_ROOT}\*.dll output\vcpkg\ /s
 
 on:
   #We are using 2 triggers, the "push" (meaning when we commit/push to this repo) and "Star" (turning "on" here)
@@ -22,6 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
     
+      - name: Checkout harbour/core repo
+        uses: actions/checkout@v2
+        with:
+          repository: harbour/core
+          path: harbour
+  
       - name: Installing dependencies
         shell: cmd 
         run: |
@@ -29,21 +36,48 @@ jobs:
           vcpkg.exe install openssl:x64-windows
           vcpkg integrate install
           
+      - name: Fixing Harbour hbssl.hbp
+        run: |
+          (Get-Content -path harbour\contrib\hbssl\hbssl.hbp) -replace 'libeay32','libcrypto-1_1-x64' | Set-Content -path harbour\contrib\hbssl\hbssl.hbp
+          (Get-Content -path harbour\contrib\hbssl\hbssl.hbp) -replace 'ssleay32','libssl-1_1-x64' | Set-Content -path harbour\contrib\hbssl\hbssl.hbp
+          (Get-Content -path harbour\contrib\hbssl\hbssl.hbc) -replace 'libeay32','libcrypto' | Set-Content -path harbour\contrib\hbssl\hbssl.hbc
+          (Get-Content -path harbour\contrib\hbssl\hbssl.hbc) -replace 'ssleay32','libssl' | Set-Content -path harbour\contrib\hbssl\hbssl.hbc
+         
+      - name: Compile Harbour
+        shell: cmd
+        run: |
+          cd harbour
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+          set HB_BUILD_MODE=c
+          set HB_USER_PRGFLAGS=-l-
+          set HB_BUILD_CONTRIBS=
+          set HB_WITH_OPENSSL=c:\vcpkg\packages\openssl-windows_x64-windows\include\
+          set HB_WITH_CURL=c:\vcpkg\packages\curl_x64-windows\include
+          set HB_STATIC_OPENSSL=yes
+          set HB_STATIC_CURL=yes
+          set HB_BUILD_DYN=yes
+          set HB_BUILD_CONTRIB_DYN=yes
+          set HB_COMPILER=msvc64
+          win-make.exe          
           
       - name: Create output folders
         shell: cmd
         run: |
-          echo on
           pwd
           mkdir output
-          mkdir output\envinfo
-          mkdir output\vcpkg
-          echo step 1
-          set > output\envinfo\EnvironmentVariables.txt
-          echo step 2
-          xcopy %VCPKG_INSTALLATION_ROOT%\*.dll output\vcpkg\ /s
-          echo step 3
-          
+          mkdir output\bin
+          mkdir output\lib
+          mkdir output\include
+          mkdir output\build_environment_info
+          mkdir output\curl_support_dlls
+          copy D:\a\Harbour_Builds\Harbour_Builds\harbour\bin\win\msvc64\*.exe output\bin
+          copy D:\a\Harbour_Builds\Harbour_Builds\harbour\lib\win\msvc64\*.* output\lib
+          copy D:\a\Harbour_Builds\Harbour_Builds\harbour\include\*.* output\include
+          set >output\build_environment_info\EnvironmentVariables.txt
+          copy c:\vcpkg\installed\x64-windows\bin\libcurl.dll           output\curl_support_dlls\libcurl.dll
+          copy c:\vcpkg\installed\x64-windows\bin\libcrypto-1_1-x64.dll output\curl_support_dlls\libcrypto-1_1-x64.dll
+          copy c:\vcpkg\installed\x64-windows\bin\libssl-1_1-x64.dll    output\curl_support_dlls\libssl-1_1-x64.dll
+        
       - name: Get current time
         uses: srfrnk/current-time@master
         id: current-time
@@ -52,8 +86,10 @@ jobs:
  
       - name: Upload Harbour to artifact
         env:
-           TIME: "${{ steps.current-time.outputs.formattedTime }}"
+           TIME: "${{steps.current-time.outputs.formattedTime}}"
         uses: actions/upload-artifact@v2
         with:
-          name: harbour_win64_msvc_${{env.TIME}}_${{github.run_number}}
+          name: harbour_win64_msvc64_${{env.TIME}}_${{github.run_number}}
           path: output
+          
+# originally from https://raw.githubusercontent.com/FiveTechSoft/Harbour_builder/master/.github/workflows/harbour_win64_ADS_msvc.yml
